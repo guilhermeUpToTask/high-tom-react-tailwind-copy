@@ -1,368 +1,140 @@
 #!/bin/bash
 
-# --- Create Directories ---
-echo "Creating directories..."
-mkdir -p src/components
-mkdir -p src/styles
-echo "Directories created."
-echo ""
+# Define the directory where components will be created
+COMPONENT_DIR="src/components"
 
-# --- Create src/styles/globals.css ---
-echo "Creating src/styles/globals.css..."
-cat << EOF > src/styles/globals.css
-/* src/styles/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+# Create the directory if it doesn't exist
+mkdir -p "$COMPONENT_DIR"
+echo "Created directory (if needed): $COMPONENT_DIR"
 
-/* Font definitions - Assuming font files are placed in public/fonts or similar */
-/* You might need to adjust the path based on your project structure */
-@font-face {
-  font-family: Inter;
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  /* Adjust path if needed, e.g., url('/fonts/inter-latin.woff2') */
-  src: url(/_next/static/media/a34f9d1faa5f3315-s.p.woff2) format('woff2');
-  /* Add other unicode-range font faces from b3cbcd051438d1d5.css if required */
-  unicode-range: U+00??, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+# --- Create Navbar.tsx ---
+cat << 'EOF' > "${COMPONENT_DIR}/Navbar.tsx"
+import React, { useState, useEffect } from 'react';
+
+interface NavLinkProps {
+  href: string;
+  children: React.ReactNode;
+  isActive?: boolean; // Optional prop to highlight active link
 }
 
-body {
-  /* Apply base font */
-  font-family: Inter, sans-serif; /* Example fallback */
-  @apply bg-black text-white; /* Apply base background and text color */
-}
-
-/* Add other global styles if any */
-
-/* Add the font class name from b3cbcd051438d1d5.css */
-.__className_d65c78 {
-    font-family: Inter, sans-serif; /* Ensure this matches your font setup */
-    font-style: normal;
-}
-
-/* Custom gradient text utility (optional, but useful for the hero) */
-@layer utilities {
-  .text-gradient-white-purple {
-    background: linear-gradient(180deg, #fff 0%, #fff 25%, rgba(167, 139, 250, 1) 90%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-}
-
-
-/* Add custom cursor styles if you implement them */
-/*
-.custom-cursor { cursor: default; }
-.custom-cursor-pointer, .custom-cursor-pointer:hover, [role=button], [role=button]:hover, a, a:hover, button, button:hover { cursor: pointer; }
-*/
-EOF
-echo "src/styles/globals.css created."
-echo ""
-
-# --- Create src/components/Navbar.tsx ---
-echo "Creating src/components/Navbar.tsx..."
-cat << EOF > src/components/Navbar.tsx
-import React, { useState } from 'react'; // Added useState for mobile menu
-
-// Replace with your actual Menu and Close icons (e.g., from lucide-react)
-const MenuIcon = () => (
-  <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-  </svg>
+const NavLink: React.FC<NavLinkProps> = ({ href, children, isActive }) => (
+  <a href={href}>
+    <span className={`text-white/90 hover:text-white transition-colors relative group cursor-pointer ${isActive ? 'text-white' : ''}`}>
+      {children}
+      <span className={`absolute -bottom-1 left-0 h-0.5 bg-purple-500 group-hover:w-full transition-all ${isActive ? 'w-full' : 'w-0'}`}></span>
+    </span>
+  </a>
 );
-
-const CloseIcon = () => (
-  <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
 
 const Navbar: React.FC = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  // Basic logic to hide/show navbar on scroll (optional, based on original JS behavior)
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') {
+        // Hide navbar when scrolling down, show when scrolling up
+        if (window.scrollY > lastScrollY && window.scrollY > 50) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
+        // Remember current scroll position for the next move
+        setLastScrollY(window.scrollY);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', controlNavbar);
+      // Cleanup function to remove the event listener
+      return () => {
+        window.removeEventListener('scroll', controlNavbar);
+      };
+    }
+  }, [lastScrollY]); // Only re-run the effect if lastScrollY changes
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-md border-b border-purple-500/20">
+    <nav
+      className={`fixed top-0 w-full z-50 bg-black/50 backdrop-blur-md border-b border-purple-500/20 transition-transform duration-300 ${isVisible ? 'transform-none' : '-translate-y-full'}`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center gap-2">
-            <a className="flex items-center" href="/">
-              {/* !!! IMPORTANT: Update this path to your actual logo file !!! */}
-              <img
-                alt="Hightom Logo"
-                className="h-8"
-                src="/images/logo.svg" // Example path, replace with your actual logo path
-                onError={(e) => (e.currentTarget.src = 'https://placehold.co/100x32/000000/FFFFFF?text=Logo')} // Basic fallback
-              />
+            <a className="flex items-center" href="/"> {/* Adjust href as needed */}
+              {/* Adjust image path based on your project structure */}
+              <img alt="Hightom Logo" className="h-8" src="/path/to/your/logo.svg" />
+              {/* Example: <img alt="Hightom Logo" className="h-8" src="./assets/images/logo.svg" /> */}
             </a>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-8">
-              <a href="/">
-                <span className="text-white/90 hover:text-white transition-colors relative group cursor-pointer">
-                  Início
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-500 group-hover:w-full transition-all duration-300"></span>
-                </span>
-              </a>
-              <a href="/quem-somos">
-                <span className="text-white/90 hover:text-white transition-colors relative group cursor-pointer">
-                  Quem somos
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-500 group-hover:w-full transition-all duration-300"></span>
-                </span>
-              </a>
-              {/* Add href for Contact if it's a page */}
-              <a href="/contato" className="text-white/90 hover:text-white transition-colors relative group cursor-pointer">
-                Contato
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-500 group-hover:w-full transition-all duration-300"></span>
-              </a>
-              {/* Add href or onClick for the button */}
-              <button className="bg-[#5B2FB8] rounded-lg text-white text-base font-normal transition-all duration-300 hover:bg-[#8B5FE0] focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.98] border-none px-8 !w-auto h-[48px]" style={{ boxShadow: 'rgba(0, 0, 0, 0.1) 0px -2px 0px inset' }}>
+              {/* Example: Mark 'Início' as active. Adjust logic based on routing */}
+              <NavLink href="/" isActive={true}>Início</NavLink>
+              <NavLink href="/quem-somos">Quem somos</NavLink>
+              {/* Adjust contact link as needed */}
+              <NavLink href="#contact">Contato</NavLink>
+              <button
+                className="w-auto h-[48px] bg-[#5B2FB8] rounded-lg text-white text-base font-normal transition-all duration-300 hover:bg-[#8B5FE0] focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.98] border-none px-8"
+                style={{ boxShadow: 'rgba(0, 0, 0, 0.1) 0px -2px 0px inset' }}
+              >
                 Saber mais
               </button>
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-purple-700/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-              aria-controls="mobile-menu"
-              aria-expanded={isMobileMenuOpen}
-            >
-              <span className="sr-only">Open main menu</span>
-              {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          {/* Mobile Menu Button (Add state and click handler for functionality) */}
+          <div className="md:hidden">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10 text-white">
+              {/* Menu Icon SVG */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu h-6 w-6"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+              <span className="sr-only">Toggle menu</span>
             </button>
+            {/* Mobile Menu Panel would go here, controlled by state */}
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu Dropdown */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 inset-x-0 bg-black/80 backdrop-blur-md border-b border-purple-500/20 pb-3" id="mobile-menu">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a href="/" className="text-white/90 hover:bg-purple-700/50 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Início</a>
-            <a href="/quem-somos" className="text-white/90 hover:bg-purple-700/50 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Quem somos</a>
-            <a href="/contato" className="text-white/90 hover:bg-purple-700/50 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Contato</a>
-            <button className="mt-4 w-full bg-[#5B2FB8] rounded-lg text-white text-base font-normal transition-all duration-300 hover:bg-[#8B5FE0] focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.98] border-none py-2" style={{ boxShadow: 'rgba(0, 0, 0, 0.1) 0px -2px 0px inset' }}>
-              Saber mais
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
 
 export default Navbar;
 EOF
-echo "src/components/Navbar.tsx created."
-echo ""
+echo "Created ${COMPONENT_DIR}/Navbar.tsx"
 
-# --- Create src/components/ValueCard.tsx ---
-echo "Creating src/components/ValueCard.tsx..."
-cat << EOF > src/components/ValueCard.tsx
+# --- Create HeroSection.tsx ---
+cat << 'EOF' > "${COMPONENT_DIR}/HeroSection.tsx"
 import React from 'react';
-
-interface ValueCardProps {
-  // If you have specific icons, you can pass them as props
-  // icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-const ValueCard: React.FC<ValueCardProps> = ({ title, description }) => {
-  return (
-    // Added basic animation on hover for subtle effect
-    <div className="bg-purple-900/10 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20 transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-500/40">
-      {/* Example Icon Structure (if needed) */}
-      {/*
-      <div className="flex items-center gap-3 mb-4">
-         <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-400">
-            {icon} // Render the icon prop here
-         </div>
-      </div>
-      */}
-      <h3 className="text-xl font-semibold mb-3 text-white">{title}</h3>
-      <p className="text-white/70">{description}</p>
-    </div>
-  );
-};
-
-export default ValueCard;
-EOF
-echo "src/components/ValueCard.tsx created."
-echo ""
-
-# --- Create src/components/AboutSection.tsx ---
-echo "Creating src/components/AboutSection.tsx..."
-cat << EOF > src/components/AboutSection.tsx
-import React from 'react';
-import ValueCard from './ValueCard';
-
-// Placeholder Icons (replace with actual SVGs/components e.g. from lucide-react)
-const RocketIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-rocket w-6 h-6 text-purple-400">
-        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
-        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
-        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
-        <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
-    </svg>
-);
-
-const TargetIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-target w-6 h-6 text-purple-400">
-        <circle cx="12" cy="12" r="10"></circle>
-        <circle cx="12" cy="12" r="6"></circle>
-        <circle cx="12" cy="12" r="2"></circle>
-    </svg>
-);
-
-const AboutSection: React.FC = () => {
-  // Note: The animations (opacity, transform) from the original HTML's style attribute
-  // would ideally be handled with a library like Framer Motion or Intersection Observer API
-  // for triggering animations on scroll. This basic version omits those for simplicity.
-
-  return (
-    <section className="py-32 relative overflow-hidden">
-      {/* Background Gradients are now part of BackgroundEffects component */}
-
-      <div className="container mx-auto px-4 relative z-10"> {/* Added z-10 to ensure content is above background elements */}
-        <div className="flex flex-col gap-12">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Quem Somos</h1>
-            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-              Conheça mais sobre a Hightom e nossa missão de transformar o mercado de pagamentos
-            </p>
-          </div>
-
-          {/* History & Mission */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto">
-            {/* Nossa História */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center">
-                  <RocketIcon />
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">Nossa História</h2>
-              </div>
-              <div className="space-y-4">
-                <p className="text-lg text-white/80 leading-relaxed">
-                  Somos uma empresa dedicada a fornecer soluções de gateway de pagamento personalizadas, impulsionando o comércio eletrônico e simplificando transações financeiras online.
-                </p>
-                <p className="text-lg text-white/80 leading-relaxed">
-                  Na Hightom, acreditamos que os pagamentos online não precisam ser apenas transações rotineiras; podem ser experiências memoráveis que refletem a identidade e visão únicas de cada negócio.
-                </p>
-                 <p className="text-lg text-white/80 leading-relaxed">
-                   Nossa equipe está comprometida em antecipar as tendências do mercado e incorporar as mais recentes inovações em nossas soluções. Ao escolher a Hightom, você está optando por uma parceria que cresce e evolui junto com as demandas dinâmicas do mundo digital.
-                 </p>
-              </div>
-            </div>
-
-            {/* Nossa Missão */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center">
-                  <TargetIcon />
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">Nossa missão</h2>
-              </div>
-              <div className="space-y-4">
-                 <p className="text-lg text-white/80 leading-relaxed">
-                   É capacitar empresas a estabelecerem uma presença digital marcante, oferecendo soluções de pagamento que vão além da simplicidade funcional.
-                 </p>
-                 <p className="text-lg text-white/80 leading-relaxed">
-                   Buscamos constantemente desenvolver gateways de pagamento que não apenas atendam às necessidades técnicas, mas também acrescentem valor à marca, proporcionando uma jornada de compra fluida e memorável.
-                 </p>
-                 <p className="text-lg text-white/80 leading-relaxed">
-                    Nosso compromisso é com a inovação contínua, segurança de ponta e uma experiência de usuário excepcional que ajuda nossos clientes a crescerem e prosperarem no competitivo mercado digital.
-                 </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Values */}
-          <div className="max-w-6xl mx-auto mt-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center">Nossos Valores</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <ValueCard
-                // icon={<InnovationIcon />} // Pass specific icons if created
-                title="Inovação"
-                description="Buscamos constantemente novas tecnologias e abordagens para oferecer soluções de pagamento de ponta."
-              />
-              <ValueCard
-                // icon={<SecurityIcon />}
-                title="Segurança"
-                description="Protegemos cada transação com os mais altos padrões de segurança do mercado."
-              />
-              <ValueCard
-                // icon={<TransparencyIcon />}
-                title="Transparência"
-                description="Mantemos uma comunicação clara e honesta com nossos clientes e parceiros."
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-       {/* Decorative elements moved to BackgroundEffects or kept here if section-specific */}
-       {/* <div className="absolute -bottom-20 left-0 w-full h-40 bg-gradient-to-t from-black to-transparent pointer-events-none"></div> */}
-       {/* <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-purple-500/5 blur-3xl pointer-events-none"></div> */}
-
-    </section>
-  );
-};
-
-export default AboutSection;
-EOF
-echo "src/components/AboutSection.tsx created."
-echo ""
-
-# --- Create src/components/HeroSection.tsx --- << NEW COMPONENT
-echo "Creating src/components/HeroSection.tsx..."
-cat << EOF > src/components/HeroSection.tsx
-import React from 'react';
+// Import animation library if needed, e.g., import { motion } from 'framer-motion';
 
 const HeroSection: React.FC = () => {
-  // Note: The animations (opacity, transform) from the original HTML's style attribute
-  // would ideally be handled with a library like Framer Motion or Intersection Observer API
-  // for triggering animations on scroll. This basic version omits those for simplicity.
+  // Example animation variants (requires framer-motion)
+  // const fadeIn = {
+  //   hidden: { opacity: 0, y: 20 },
+  //   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  // };
 
   return (
     <section id="home" className="relative pt-32 pb-40 overflow-hidden"> {/* Added overflow-hidden */}
-      {/* Container for content */}
-      <div className="container mx-auto px-4 relative z-10"> {/* Added z-10 */}
-        <div className="flex flex-col items-center text-center max-w-4xl mx-auto"> {/* Removed mb-20, adjust spacing as needed */}
+      {/* Add Background Elements Component here if separated */}
+      {/* <BackgroundElements /> */}
 
-          {/* Subheading */}
+      <div className="container mx-auto px-4 relative z-10"> {/* Added relative z-10 */}
+        <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-20">
+          {/* Apply animation using motion.p, motion.h1 etc. if using framer-motion */}
           <p className="text-sm uppercase tracking-wider text-gray-400 mb-4">
             Solução White Label Exclusiva
           </p>
-
-          {/* Main Heading with Gradient Text */}
-          {/* Using custom utility class 'text-gradient-white-purple' defined in globals.css */}
-          <h1 className="text-4xl md:text-6xl font-bold mb-3 md:mb-6 text-gradient-white-purple leading-tight md:leading-tight"> {/* Adjusted leading */}
+          <h1 className="text-4xl md:text-6xl font-bold mb-3 md:mb-6 bg-[linear-gradient(180deg,_#fff_0%,_#fff_25%,_rgba(167,_139,_250,_1)_90%)] bg-clip-text text-transparent leading-relaxed">
             Transforme sua visão em<br />
             <span className="inline-block py-1 md:py-2">realidade digital</span>
           </h1>
-
-          {/* Description */}
           <p className="text-lg md:text-xl text-gray-400 mb-8 md:mb-12 max-w-2xl">
             A Hightom oferece uma plataforma sob medida, equipada com tecnologia de última geração e autonomia total para gerenciar suas operações financeiras.
           </p>
-
-          {/* Call to Action Button */}
           <div>
             <button
               className="w-[280px] h-[48px] bg-[#5B2FB8] rounded-lg text-white text-base font-normal transition-all duration-300 hover:bg-[#8B5FE0] focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.98] border-none"
@@ -372,165 +144,499 @@ const HeroSection: React.FC = () => {
             </button>
           </div>
 
-          {/* Image Section */}
+          {/* Dashboard Image */}
           <div className="mt-16 w-full max-w-5xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden border border-purple-500/20 bg-black/40 backdrop-blur-sm shadow-xl shadow-purple-500/10"> {/* Added shadow */}
-              {/* Optional inner gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent pointer-events-none"></div>
-
-              {/* Image - IMPORTANT: Replace src with your actual image path */}
+            <div className="relative rounded-2xl overflow-hidden border border-purple-500/20 bg-black/40 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent"></div>
+              {/* Adjust image path */}
               <img
                 alt="Dashboard Interface"
-                width="1920" // Provide original width
-                height="1080" // Provide original height
+                width="1920"
+                height="1080"
                 decoding="async"
-                loading="lazy" // Added lazy loading
-                className="w-full h-auto block" // Ensure image behaves correctly
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Foto.JPEG-VaMPh3xEbootvvdtPF7SjXWkRkjTf6.jpeg" // Replace with your image URL/path
-                onError={(e) => (e.currentTarget.src = 'https://placehold.co/1920x1080/000000/555555?text=Dashboard+Preview')} // Placeholder
-                style={{ color: 'transparent' }} // Keep style from original if needed
+                className="w-full h-auto"
+                src="/path/to/your/dashboard-image.jpg" // Example path
+                // src="./assets/images/dashboard.jpeg"
+                style={{ color: 'transparent' }}
               />
             </div>
           </div>
         </div>
       </div>
-      {/* Background elements like gradients/blurs should be handled by BackgroundEffects or globally */}
     </section>
   );
 };
 
 export default HeroSection;
+
+// Optional: Define BackgroundElements component separately
+// const BackgroundElements: React.FC = () => (
+//   <div className="absolute inset-0 z-0">
+//     {/* Add all the complex background divs/canvas elements here */}
+//     <div className="pointer-events-none fixed inset-0 z-30 transition duration-300" style={{background: 'radial-gradient(600px at 758px 300px, rgba(147, 51, 234, 0.15), rgba(126, 34, 206, 0.1) 40%, rgba(88, 28, 135, 0.05) 60%, transparent 80%)', opacity: 1}}></div>
+//     {/* ... other background elements ... */}
+//   </div>
+// );
+
 EOF
-echo "src/components/HeroSection.tsx created."
-echo ""
+echo "Created ${COMPONENT_DIR}/HeroSection.tsx"
+
+# --- Create FeaturesSection.tsx ---
+cat << 'EOF' > "${COMPONENT_DIR}/FeaturesSection.tsx"
+import React, { useState, useEffect, useRef } from 'react';
+// Import animation library if needed, e.g., import { motion, useInView } from 'framer-motion';
+// Import icon components or SVGs
+// Example: import { TargetIcon, SmartphoneIcon, LibraryIcon } from './Icons';
+
+// Placeholder Icon Components (replace with actual SVGs or library)
+const TargetIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c5.51 0 10-4.48 10-10S17.51 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3-8c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"></path><path d="M12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"></path></svg>;
+const SmartphoneIcon = () => <svg className="w-8 h-8 text-black relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>;
+const LibraryIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-black relative z-10"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>;
 
 
-# --- Create src/components/Footer.tsx ---
-echo "Creating src/components/Footer.tsx..."
-cat << EOF > src/components/Footer.tsx
-import React from 'react';
+interface FeatureBlockProps {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    buttonText?: string;
+    children?: React.ReactNode; // For custom content like the theme switcher or canvas
+    reverseLayout?: boolean; // To alternate layout
+}
 
-const Footer: React.FC = () => {
-  // Get current year dynamically
-  const currentYear = new Date().getFullYear();
+const FeatureBlock: React.FC<FeatureBlockProps> = ({
+    icon,
+    title,
+    description,
+    buttonText = "Saber mais",
+    children,
+    reverseLayout = false,
+}) => {
+    // Ref for scroll animations
+    const ref = useRef(null);
+    // const isInView = useInView(ref, { once: true, amount: 0.3 }); // Example with framer-motion
 
-  return (
-    <footer className="py-12 bg-black border-t border-purple-500/20 relative z-10"> {/* Added z-10 */}
-      <div className="container mx-auto px-4 text-center">
-        <p className="text-sm text-white/60">
-          © {currentYear} Hightom. Todos os direitos reservados.
-        </p>
-        {/* You could add social links or other footer content here */}
-      </div>
-    </footer>
-  );
-};
+    // Animation variants (example)
+    // const variants = {
+    //   hidden: { opacity: 0, x: reverseLayout ? -20 : 20 },
+    //   visible: { opacity: 1, x: 0, transition: { duration: 0.6 } }
+    // };
 
-export default Footer;
-EOF
-echo "src/components/Footer.tsx created."
-echo ""
-
-# --- Create src/components/BackgroundEffects.tsx ---
-echo "Creating src/components/BackgroundEffects.tsx..."
-cat << EOF > src/components/BackgroundEffects.tsx
-import React, { useState, useEffect } from 'react';
-
-const BackgroundEffects: React.FC = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-
-    // Cleanup listener on component unmount
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []); // Empty dependency array means this effect runs once on mount
-
-  return (
-    <>
-      {/* Mouse move gradient effect */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 transition duration-300" // z-0 to be behind content
-        style={{
-          background: \`radial-gradient(600px at \${mousePosition.x}px \${mousePosition.y}px, rgba(147, 51, 234, 0.15), rgba(126, 34, 206, 0.1) 40%, rgba(88, 28, 135, 0.05) 60%, transparent 80%)\`,
-          opacity: 1, // Opacity can be adjusted
-        }}
-      />
-
-      {/* Static background elements from original main/body */}
-      {/* These create the base dark theme with purple hints */}
-      {/* Placed with negative z-index to be behind everything */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-purple-900/20 via-black to-black pointer-events-none"></div>
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black to-transparent pointer-events-none"></div>
-
-      {/* Specific section background elements (can be moved to sections if preferred) */}
-       {/* Placed with negative z-index */}
-       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-purple-500/5 blur-3xl pointer-events-none -z-10"></div>
-       {/* This gradient might need adjustment based on where it should appear relative to footer/sections */}
-       <div className="absolute -bottom-20 left-0 w-full h-40 bg-gradient-to-t from-black to-transparent pointer-events-none -z-10"></div>
-
-    </>
-  );
-};
-
-export default BackgroundEffects;
-EOF
-echo "src/components/BackgroundEffects.tsx created."
-echo ""
-
-
-# --- Create src/App.tsx ---
-echo "Creating src/App.tsx..."
-cat << EOF > src/App.tsx
-import React from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection'; // Import HeroSection
-import AboutSection from './components/AboutSection';
-import Footer from './components/Footer';
-import BackgroundEffects from './components/BackgroundEffects';
-import './styles/globals.css'; // Import global styles
-
-const App: React.FC = () => {
-  return (
-    // Apply the font class from globals.css to the root element
-    // Add custom cursor class if implemented: className="__className_d65c78 custom-cursor"
-    <div className="__className_d65c78">
-        <BackgroundEffects />
-        {/* Use relative positioning on main container to establish stacking context */}
-        <div className="relative z-10"> {/* Ensure content is above background effects */}
-            <Navbar />
-            {/* min-h-screen ensures the main content area takes at least the full screen height */}
-            <main className="min-h-screen bg-transparent text-white"> {/* Background is handled by BackgroundEffects */}
-                {/* Page Sections */}
-                <HeroSection /> {/* Add the Hero Section */}
-                <AboutSection />
-                {/* Add other page sections/components here */}
-            </main>
-            <Footer />
+    return (
+        // Use motion.div for animations
+        <div ref={ref} className={`grid lg:grid-cols-2 gap-12 items-center ${reverseLayout ? 'lg:grid-flow-row-dense' : ''}`}
+            // initial="hidden"
+            // animate={isInView ? "visible" : "hidden"}
+            // variants={variants}
+        >
+             <div className={`relative ${reverseLayout ? 'lg:col-start-2' : ''}`}>
+                <div className="relative group">
+                    <div className="space-y-6">
+                        <div className="w-16 h-16 rounded-full bg-[#C1F664] flex items-center justify-center relative group mb-8">
+                            <div className="absolute inset-0 rounded-full bg-[#C1F664] blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                            <div className="relative z-10">{icon}</div>
+                        </div>
+                        <h3 className="text-4xl md:text-5xl font-medium text-white mb-6 whitespace-pre-line">{title}</h3>
+                        <p className="text-lg text-[#9b9b9b] leading-relaxed mb-8">{description}</p>
+                         <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-10 py-2 bg-black hover:bg-black/80 text-white border border-[#6938D3] transition-colors rounded-lg group px-6 mt-4">
+                            {buttonText}
+                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+             <div className={`relative ${reverseLayout ? 'lg:col-start-1' : ''}`}>
+                {children}
+            </div>
         </div>
+    );
+};
+
+
+// Example Theme Switcher Component (Conceptual)
+const ThemeSwitcher: React.FC = () => {
+    const themes = [
+        { name: 'Zinc', color: 'bg-zinc-400/20', activeColor: 'bg-zinc-500', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/zinc-2OM8pFgMjEXYYffbAsopNhbokpBJ80.png' },
+        { name: 'Red', color: 'bg-red-500/20', activeColor: 'bg-red-500', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/red-FRjXX6wXTPaPzxKws3PWZ11csiNTvU.png' },
+        { name: 'Blue', color: 'bg-blue-500/20', activeColor: 'bg-blue-500', image: '/path/to/blue-theme.png' }, // Add path
+        { name: 'Green', color: 'bg-green-500/20', activeColor: 'bg-green-500', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/green-kIfF2LmlXvfuGPDhgtIUucg6hLD5O3.png' },
+        { name: 'Purple', color: 'bg-purple-500/20', activeColor: 'bg-purple-500', image: '/path/to/purple-theme.png' }, // Add path
+        { name: 'Cyan', color: 'bg-cyan-500/20', activeColor: 'bg-cyan-500', image: '/path/to/cyan-theme.png' }, // Add path
+        { name: 'Orange', color: 'bg-orange-500/20', activeColor: 'bg-orange-500', image: 'https://www.hightomdev.com/images/orange-theme-dark.png' },
+        { name: 'Yellow', color: 'bg-yellow-500/20', activeColor: 'bg-yellow-500', image: '/path/to/yellow-theme-dark.png', default: true }, // Adjust path
+        { name: 'Violet', color: 'bg-violet-500/20', activeColor: 'bg-violet-500', image: '/path/to/violet-theme.png' }, // Add path
+    ];
+    const defaultTheme = themes.find(t => t.default) || themes[0];
+    const [activeTheme, setActiveTheme] = useState<string>(defaultTheme.name);
+    const [currentImage, setCurrentImage] = useState<string>(defaultTheme.image);
+
+    const handleThemeChange = (themeName: string) => {
+        const selectedTheme = themes.find(t => t.name === themeName);
+        if (selectedTheme) {
+            setActiveTheme(selectedTheme.name);
+            setCurrentImage(selectedTheme.image);
+        }
+    };
+
+    return (
+        <div className="relative">
+            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-purple-500/20 bg-black">
+                <div className="relative w-full h-full">
+                    {/* Use a key to force image remount on change for transition */}
+                    <div key={activeTheme} className="absolute inset-0 animate-fade-in"> {/* Simple fade animation */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-20"></div>
+                         <img
+                            alt={`Dashboard Interface - ${activeTheme} Theme Dark`}
+                            decoding="async"
+                            className="object-fill bg-black absolute h-full w-full inset-0 text-transparent"
+                            src={currentImage}
+                            onError={(e) => { e.currentTarget.src = 'https://placehold.co/1600x900/000000/ffffff?text=Image+Error'; }} // Basic fallback
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className="flex justify-center gap-2 mt-4">
+                {themes.map((theme) => (
+                    <button
+                        key={theme.name}
+                        onClick={() => handleThemeChange(theme.name)}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${activeTheme === theme.name ? `${theme.activeColor} w-4` : theme.color}`}
+                        aria-label={`Switch to ${theme.name} theme`}
+                    ></button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// Placeholder for 3D Canvas Component
+const Canvas3DPlaceholder: React.FC = () => {
+    // Add useEffect hook here to initialize and manage your 3D scene (e.g., using three.js)
+    useEffect(() => {
+        // three.js initialization code would go here
+        console.log("Initialize 3D Canvas");
+        // Remember to handle cleanup
+        return () => {
+            console.log("Cleanup 3D Canvas");
+            // Dispose of three.js resources
+        };
+    }, []);
+
+    return (
+        <div className="relative h-[600px]">
+            <div className="w-full h-full overflow-hidden bg-black/30 rounded-2xl">
+                <div className="w-full h-full relative">
+                    {/* The actual canvas element for three.js */}
+                    <canvas id="canvas3d" className="w-full h-full block"></canvas>
+                    {/* Optional overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-black to-transparent z-20"></div>
+                </div>
+                 {/* Removed duplicate overlay */}
+            </div>
+        </div>
+    );
+};
+
+
+const FeaturesSection: React.FC = () => {
+  return (
+    <section className="py-20 relative overflow-hidden bg-black text-white">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className="max-w-3xl mx-auto text-center mb-24">
+          <div className="mb-6">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input hover:text-accent-foreground h-10 py-2 bg-[#14141F] border-none text-white/80 hover:bg-[#1a1a2f] transition-colors rounded-full px-6">
+              Desperte seu potencial
+            </button>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-medium mb-6">
+            Horizontes Infinitos
+          </h2>
+          <p className="text-lg text-[#9b9b9b] leading-relaxed mb-16 max-w-2xl mx-auto">
+            Desbrave novos mercados com nossa solução white label! Conecte-se com os melhores produtores, aproveite taxas imbatíveis e transforme sua visão em um negócio de sucesso. O futuro do seu empreendimento começa aqui!
+          </p>
+        </div>
+
+        {/* Feature Block 1: Identity */}
+        <FeatureBlock
+          icon={<TargetIcon />}
+          title="Sua Identidade, Seu Poder, Seu Sucesso"
+          description="Dê vida à sua identidade: molde cada detalhe, escolha suas cores e crie uma experiência que reflita sua essência única!"
+        >
+          <ThemeSwitcher />
+        </FeatureBlock>
+
+
+        {/* Feature Block 2: Mobile App */}
+         <div className="mt-32">
+            <FeatureBlock
+                icon={<SmartphoneIcon />}
+                title="Aplicativo mobile"
+                description="Em nosso ecossistema, oferecemos também um app mobile disponível para Android e iOS, onde os seus produtores recebem notificações e podem acompanhar suas vendas."
+                reverseLayout={true} // Alternate layout
+                >
+                 <Canvas3DPlaceholder />
+            </FeatureBlock>
+        </div>
+
+
+        {/* Feature Block 3: Members Area */}
+        <div className="mt-32">
+            <FeatureBlock
+                icon={<LibraryIcon />}
+                title="Área de Membros Exclusiva"
+                description="No nosso ecossistema, você conta com uma área de membros intuitiva e segura, perfeita para centralizar e gerenciar seu conteúdo. Seja para cursos, mentorias ou materiais exclusivos, oferecemos uma experiência fluida e profissional para você."
+                 >
+                 <div className="relative">
+                    {/* Apply perspective and rotation for the 3D effect */}
+                    <div className="relative w-full aspect-[16/10] transform perspective-[2000px] rotate-x-[10deg] rotate-y-[-10deg] rotate-z-[-5deg] translate-z-[-50px] shadow-2xl">
+                         <img
+                             alt="MacBook Dashboard Interface - Área de Membros"
+                            decoding="async"
+                            className="object-contain absolute h-full w-full inset-0 text-transparent bg-transparent"
+                            // Adjust path
+                            src="/path/to/your/macbook-members-area.png"
+                            // src="./assets/images/macbook-members-area.png"
+                        />
+                    </div>
+                </div>
+            </FeatureBlock>
+        </div>
+
+      </div>
+       {/* Add global background elements if needed */}
+    </section>
+  );
+};
+
+export default FeaturesSection;
+EOF
+echo "Created ${COMPONENT_DIR}/FeaturesSection.tsx"
+
+# --- Create EcosystemFeatures.tsx ---
+cat << 'EOF' > "${COMPONENT_DIR}/EcosystemFeatures.tsx"
+import React from 'react';
+// Import animation library if needed, e.g., import { motion, useInView } from 'framer-motion';
+// Import icon components or SVGs
+
+// Placeholder icons - replace with actual SVGs or icon components
+const GlobeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe w-4 h-4 text-purple-400"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>;
+const ZapIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-zap w-4 h-4 text-purple-400"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg>;
+const WebhookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-webhook w-4 h-4 text-purple-400"><path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"></path><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"></path><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"></path></svg>;
+const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-dashboard w-4 h-4 text-purple-400"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>;
+const SmartphoneIconSmall = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone w-4 h-4 text-purple-400"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users w-4 h-4 text-purple-400"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+const UsersRoundIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users-round w-4 h-4 text-purple-400"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"></path></svg>;
+const ShoppingCartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shopping-cart w-4 h-4 text-purple-400"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>;
+const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-share2 w-4 h-4 text-purple-400"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg>;
+
+
+interface FeatureItemProps {
+    icon: React.ReactNode;
+    text: React.ReactNode; // Allows JSX for highlighting
+    index: number; // For staggered animation delay
+}
+
+const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text, index }) => {
+    // Animation setup (example with framer-motion)
+    // const ref = useRef(null);
+    // const isInView = useInView(ref, { once: true, amount: 0.5 });
+    // const variants = {
+    //   hidden: { opacity: 0, y: 20 },
+    //   visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: index * 0.05 } } // Staggered delay
+    // };
+
+    return (
+        // Use motion.div for animations
+        <div
+            // ref={ref}
+            className="relative"
+            // initial="hidden"
+            // animate={isInView ? "visible" : "hidden"}
+            // variants={variants}
+        >
+            <div className="relative flex items-center gap-3 bg-gradient-to-br from-[#1A1A1A] to-[#0D0D0D] rounded-full px-4 py-3 border border-purple-500/20 h-full"> {/* Added h-full */}
+                <div className="relative flex-shrink-0 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center overflow-hidden">
+                    {icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white/90">{text}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const EcosystemFeatures: React.FC = () => {
+    const features = [
+        { icon: <GlobeIcon />, text: <>Checkout com <span className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent font-semibold">domínio dos usuários</span></> },
+        { icon: <ZapIcon />, text: <>Recuperação de vendas com <span className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent font-semibold">IA</span></> },
+        { icon: <WebhookIcon />, text: <>Webhooks</> }, // Removed empty span
+        { icon: <DashboardIcon />, text: <>Dashboard <span className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent font-semibold">intuitiva</span></> },
+        { icon: <SmartphoneIconSmall />, text: <>Aplicativo <span className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent font-semibold">mobile</span></> },
+        { icon: <UsersIcon />, text: <>Area de <span className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent font-semibold">membros</span></> },
+        { icon: <UsersRoundIcon />, text: <>Co-produção</> },
+        { icon: <ShoppingCartIcon />, text: <>Marketplace</> },
+        { icon: <ShareIcon />, text: <>Sistema de <span className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent font-semibold">indique e ganhe</span></> },
+    ];
+
+    return (
+        <section className="py-20 bg-black relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute top-1/4 left-1/4 w-1/2 h-64 bg-purple-600/5 blur-[120px] rounded-full pointer-events-none"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-1/2 h-64 bg-purple-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+            <div className="container mx-auto px-4 py-12 border border-purple-500/20 rounded-3xl bg-black/80 backdrop-blur-sm shadow-[0_0_50px_rgba(168,85,247,0.03)] relative z-10">
+                <h2 className="text-2xl md:text-3xl font-medium text-center mb-16 bg-gradient-to-b from-white via-white/70 to-white/50 bg-clip-text text-transparent">
+                    Tudo que o Ecossistema Hightom Oferece
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {features.map((feature, index) => (
+                        <FeatureItem key={index} icon={feature.icon} text={feature.text} index={index} />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+export default EcosystemFeatures;
+EOF
+echo "Created ${COMPONENT_DIR}/EcosystemFeatures.tsx"
+
+# --- Create FAQSection.tsx ---
+cat << 'EOF' > "${COMPONENT_DIR}/FAQSection.tsx"
+import React, { useState, useRef } from 'react';
+// Import animation library if needed, e.g., import { motion, useInView } from 'framer-motion';
+
+interface AccordionItemProps {
+  title: string;
+  children: React.ReactNode;
+  index: number; // For animation delay
+}
+
+const AccordionItem: React.FC<AccordionItemProps> = ({ title, children, index }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  // Animation setup
+  // const ref = useRef(null);
+  // const isInView = useInView(ref, { once: true, amount: 0.2 });
+  // const variants = {
+  //   hidden: { opacity: 0, y: 10 },
+  //   visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: index * 0.05 } }
+  // };
+
+  return (
+    // Use motion.div for animations
+    <div
+      // ref={ref}
+      data-state={isOpen ? 'open' : 'closed'}
+      className="border-b border-purple-500/20 group bg-purple-900/10 backdrop-blur-sm rounded-lg px-6 transition-all duration-300 hover:bg-purple-900/20"
+      // initial="hidden"
+      // animate={isInView ? "visible" : "hidden"}
+      // variants={variants}
+    >
+      <h3 className="flex">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          data-state={isOpen ? 'open' : 'closed'}
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex flex-1 items-center justify-between py-4 font-medium text-white group-hover:text-purple-400 transition-colors duration-300 data-[state=open]:text-purple-400 no-underline hover:no-underline w-full" // Added w-full
+        >
+          <span className="block py-4 text-left flex-1 pr-2">{title}</span> {/* Added flex-1 pr-2 */}
+          {/* Chevron Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`lucide lucide-chevron-down h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          >
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+      </h3>
+      {/* Content Area */}
+      <div
+        // Use a library like 'react-animate-height' for smooth height transition or CSS transitions
+        className={`overflow-hidden text-sm text-white/70 transition-[max-height] duration-300 ease-in-out ${isOpen ? 'max-h-96' : 'max-h-0'}`} // Example height transition
+      >
+         <div className="pt-0 pb-4">{children}</div> {/* Content wrapper with padding */}
+      </div>
     </div>
   );
 };
 
-export default App;
+
+const FAQSection: React.FC = () => {
+  const faqs = [
+    { q: "Qual o prazo de implementação do gateway?", a: "O prazo de implementação pode variar, mas nosso objetivo é ter tudo pronto rapidamente. Entre em contato para uma estimativa precisa." },
+    { q: "Quais formas de pagamento estão disponíveis?", a: "Oferecemos Pix, Boleto e Cartão de Crédito/Débito (nacional e internacional), integrados com os principais adquirentes do mercado." },
+    { q: "Há custos mensais fixos?", a: "Nosso modelo principal é baseado em taxas por transação, sem mensalidades fixas obrigatórias. Planos personalizados podem ser discutidos." },
+    { q: "Como funciona o white label?", a: "Permite que você personalize completamente a plataforma com sua marca, logotipo, cores e domínio, oferecendo uma experiência única aos seus clientes como se fosse sua própria tecnologia." },
+    { q: "É necessário ter CNPJ?", a: "Sim, para operar um gateway de pagamentos e processar transações financeiras no Brasil, é legalmente necessário possuir um CNPJ ativo." },
+    { q: "Preciso de conhecimento técnico?", a: "Não necessariamente. Oferecemos um painel intuitivo e integrações 'No Code'. Para desenvolvedores, fornecemos uma API robusta e bem documentada." },
+    { q: "Posso personalizar o domínio?", a: "Sim, você pode configurar seu próprio domínio para o checkout e outras interfaces voltadas ao cliente, reforçando sua marca." },
+    { q: "Como faço o monitoramento das transações?", a: "Através do nosso painel administrativo completo, você tem acesso a relatórios detalhados, dashboards e monitoramento em tempo real de todas as transações." },
+    { q: "O gateway é compatível com outros checkouts?", a: "Sim, nossa API flexível permite a integração com diversas plataformas de e-commerce, sistemas de CRM e checkouts externos." },
+  ];
+
+  // Animation setup for the section title
+  // const titleRef = useRef(null);
+  // const titleInView = useInView(titleRef, { once: true, amount: 0.5 });
+
+  return (
+    <section className="py-20 relative bg-black">
+      <div className="container mx-auto px-4 max-w-3xl">
+        {/* Use motion.div for animations */}
+        <div
+          // ref={titleRef}
+          className="text-center mb-12"
+          // initial={{ opacity: 0, y: 20 }}
+          // animate={titleInView ? { opacity: 1, y: 0 } : {}}
+          // transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">
+            Perguntas Frequentes
+          </h2>
+          <p className="text-lg text-white/70">
+            Tire suas dúvidas sobre nossa plataforma
+          </p>
+        </div>
+        <div>
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} title={faq.q} index={index}>
+                {faq.a}
+              </AccordionItem>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default FAQSection;
 EOF
-echo "src/App.tsx created."
-echo ""
+echo "Created ${COMPONENT_DIR}/FAQSection.tsx"
+
+# --- Add other components similarly ---
+# Example: cat << 'EOF' > "${COMPONENT_DIR}/PaymentMethodsSection.tsx"
+# ... Paste PaymentMethodsSection code here ...
+# EOF
+# echo "Created ${COMPONENT_DIR}/PaymentMethodsSection.tsx"
 
 # --- Make script executable ---
-# chmod +x setup_components.sh # Uncomment this line if saving the script to a file
+chmod +x create_components.sh
 
-echo "--- Script finished ---"
-echo "Remember to:"
-echo "1. Place your logo image (e.g., logo.svg) in the correct path (e.g., public/images/) and update the path in Navbar.tsx."
-echo "2. Place the hero image (Foto.JPEG-...) in the correct path and update the URL in HeroSection.tsx."
-echo "3. Place font files if needed and update paths in globals.css."
-echo "4. Install any necessary icon libraries (like lucide-react) if you replace the placeholder SVGs."
-echo "5. Run your React development server (e.g., npm run dev or yarn dev)."
+echo "-------------------------------------"
+echo "Script finished. Components created in $COMPONENT_DIR"
+echo "You may need to adjust import paths for assets (images, fonts) and icons within the generated files."
+echo "Run this script from your project's root directory using: ./create_components.sh"
+echo "-------------------------------------"
 

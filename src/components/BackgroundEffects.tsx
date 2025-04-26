@@ -20,7 +20,7 @@ const BackgroundEffects: React.FC = () => {
     <>
       {/* Mouse move gradient effect */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 transition duration-300" // z-0 to be behind content
+        className="pointer-events-none fixed inset-0 z-30 transition duration-300" // z-0 to be behind content
         style={{
           background: `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(147, 51, 234, 0.15), rgba(126, 34, 206, 0.1) 40%, rgba(88, 28, 135, 0.05) 60%, transparent 80%)`,
           opacity: 1, // Opacity can be adjusted
