@@ -141,7 +141,7 @@ const ThemeSwitcher: React.FC = () => {
             name: "Blue",
             color: "bg-blue-500/20",
             activeColor: "bg-blue-500",
-            image: "/path/to/blue-theme.png",
+            image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/blue-NN3tzmiIqhw6ET3vtGdOQF8xcRgXR3.png",
         }, // Add path
         {
             name: "Green",
@@ -153,13 +153,13 @@ const ThemeSwitcher: React.FC = () => {
             name: "Purple",
             color: "bg-purple-500/20",
             activeColor: "bg-purple-500",
-            image: "/path/to/purple-theme.png",
+            image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Foto.JPEG-VaMPh3xEbootvvdtPF7SjXWkRkjTf6.jpeg",
         }, // Add path
         {
             name: "Cyan",
             color: "bg-cyan-500/20",
             activeColor: "bg-cyan-500",
-            image: "/path/to/cyan-theme.png",
+            image: "https://www.hightomdev.com/images/cyan-theme-dark.png",
         }, // Add path
         {
             name: "Orange",
@@ -171,14 +171,14 @@ const ThemeSwitcher: React.FC = () => {
             name: "Yellow",
             color: "bg-yellow-500/20",
             activeColor: "bg-yellow-500",
-            image: "/path/to/yellow-theme-dark.png",
+            image: "https://www.hightomdev.com/images/yellow-theme-dark.png",
             default: true,
         }, // Adjust path
         {
             name: "Violet",
             color: "bg-violet-500/20",
             activeColor: "bg-violet-500",
-            image: "/path/to/violet-theme.png",
+            image: "https://www.hightomdev.com/images/violet-theme-light.png",
         }, // Add path
     ];
     const defaultTheme = themes.find((t) => t.default) || themes[0];

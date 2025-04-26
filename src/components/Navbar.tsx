@@ -51,11 +51,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center gap-2">
-            <a className="flex items-center" href="/"> {/* Adjust href as needed */}
-              {/* Adjust image path based on your project structure */}
-              <img alt="Hightom Logo" className="h-8" src="/path/to/your/logo.svg" />
-              {/* Example: <img alt="Hightom Logo" className="h-8" src="./assets/images/logo.svg" /> */}
-            </a>
+  
           </div>
 
           {/* Desktop Menu */}

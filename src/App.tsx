@@ -8,6 +8,7 @@ import FeaturesSection from './components/FeaturesSection';
 import FAQSection from './components/FAQSection';
 import EcosystemFeatures from './components/EcosystemFeatures';
 import BackgroundComponent from './components/BackgroundComponent';
+import ContactSection from './components/ContactSection';
 
 const App: React.FC = () => {
   return (
@@ -24,9 +25,9 @@ const App: React.FC = () => {
                 {/* Page Sections */}
                 <HeroSection /> {/* Add the Hero Section */}
                 <FeaturesSection /> {/* Add the Features Section */}
-                <FAQSection/>
                 <EcosystemFeatures/>
-                {/* Add other page sections/components here */}
+                <FAQSection/>
+                <ContactSection/>
             </main>
             <Footer />
         </div>
