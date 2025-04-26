@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 43 65% 52%;  /* Gold */
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 43 65% 52%;  /* Gold */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 43 65% 52%;  /* Gold */
+    --input: 0 0% 14.9%;
+    --ring: 43 65% 52%;  /* Gold */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-charcoal-950 text-slate-100 font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-white;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl font-bold leading-tight;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl font-bold leading-tight;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold leading-snug;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl font-semibold leading-snug;
+  }
+  
+  h5 {
+    @apply text-lg md:text-xl font-medium leading-normal;
+  }
+  
+  h6 {
+    @apply text-base md:text-lg font-medium leading-normal;
+  }
+  
+  p {
+    @apply leading-relaxed;
+  }
+  
+  a {
+    @apply text-gold-400 hover:text-gold-300 transition-colors duration-200;
+  }
+}
+
+@layer components {
+  .gold-gradient-text {
+    @apply bg-gold-gradient text-transparent bg-clip-text;
+  }
+  
+  .gold-border {
+    @apply border border-gold-500;
+  }
+  
+  .gold-glow {
+    @apply shadow-gold-glow;
+  }
+  
+  .glass-card {
+    @apply bg-charcoal-900/60 backdrop-blur-sm border border-gold-500/30 rounded-lg;
+  }
+  
+  .luxury-btn {
+    @apply px-6 py-3 rounded-md bg-charcoal-800 text-white border border-gold-500 
+           hover:bg-charcoal-700 hover:shadow-gold-md transition-all duration-300;
+  }
+  
+  .luxury-btn-filled {
+    @apply px-6 py-3 rounded-md bg-gold-500 text-charcoal-950 font-medium
+           hover:bg-gold-400 hover:shadow-gold-md transition-all duration-300;
+  }
+  
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+  
+  .shimmer::after {
+    @apply content-[''] absolute top-0 left-0 w-full h-full;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 4s infinite;
+  }
+}
