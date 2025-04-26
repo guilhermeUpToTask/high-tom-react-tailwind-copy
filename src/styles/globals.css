@@ -1,0 +1,48 @@
+/* src/styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font definitions - Assuming font files are placed in public/fonts or similar */
+/* You might need to adjust the path based on your project structure */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  /* Adjust path if needed, e.g., url('/fonts/inter-latin.woff2') */
+  src: url(/_next/static/media/a34f9d1faa5f3315-s.p.woff2) format('woff2');
+  /* Add other unicode-range font faces from b3cbcd051438d1d5.css if required */
+  unicode-range: U+00??, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+body {
+  /* Apply base font */
+  font-family: Inter, sans-serif; /* Example fallback */
+  @apply bg-black text-white; /* Apply base background and text color */
+}
+
+/* Add other global styles if any */
+
+/* Add the font class name from b3cbcd051438d1d5.css */
+.__className_d65c78 {
+    font-family: Inter, sans-serif; /* Ensure this matches your font setup */
+    font-style: normal;
+}
+
+/* Custom gradient text utility (optional, but useful for the hero) */
+@layer utilities {
+  .text-gradient-white-purple {
+    background: linear-gradient(180deg, #fff 0%, #fff 25%, rgba(167, 139, 250, 1) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+
+/* Add custom cursor styles if you implement them */
+/*
+.custom-cursor { cursor: default; }
+.custom-cursor-pointer, .custom-cursor-pointer:hover, [role=button], [role=button]:hover, a, a:hover, button, button:hover { cursor: pointer; }
+*/

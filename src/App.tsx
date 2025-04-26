@@ -1,16 +1,31 @@
+import React from 'react';
+import Navbar from './components/Navbar';
+import HeroSection from './components/HeroSection'; // Import HeroSection
+import AboutSection from './components/AboutSection';
+import Footer from './components/Footer';
+import BackgroundEffects from './components/BackgroundEffects';
+import './styles/globals.css'; // Import global styles
 
-function App() {
-
+const App: React.FC = () => {
   return (
-    <div>
-      <h1>Welcome to React with TypeScript!</h1>
-      <p>This is a simple React application using TypeScript.</p>
-      <p>To get started, edit <code>src/App.tsx</code> and save to reload.</p>
-      <a href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-        Learn React
-      </a>
+    // Apply the font class from globals.css to the root element
+    // Add custom cursor class if implemented: className="__className_d65c78 custom-cursor"
+    <div className="__className_d65c78">
+        <BackgroundEffects />
+        {/* Use relative positioning on main container to establish stacking context */}
+        <div className="relative z-10"> {/* Ensure content is above background effects */}
+            <Navbar />
+            {/* min-h-screen ensures the main content area takes at least the full screen height */}
+            <main className="min-h-screen bg-transparent text-white"> {/* Background is handled by BackgroundEffects */}
+                {/* Page Sections */}
+                <HeroSection /> {/* Add the Hero Section */}
+                <AboutSection />
+                {/* Add other page sections/components here */}
+            </main>
+            <Footer />
+        </div>
     </div>
   );
-}
+};
 
 export default App;
