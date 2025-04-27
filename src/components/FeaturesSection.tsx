@@ -1,5 +1,6 @@
 import React, { useState, useRef, lazy, Suspense } from "react";
 const IphoneScene = lazy(() => import("./IphoneScene"));
+import macbookImage from "../../assets/images/macbook-members-area.png"; // Adjust path as needed
 // Import animation library if needed, e.g., import { motion, useInView } from 'framer-motion';
 // Import icon components or SVGs
 // Example: import { TargetIcon, SmartphoneIcon, LibraryIcon } from './Icons';
@@ -317,7 +318,7 @@ const FeaturesSection: React.FC = () => {
                                     decoding="async"
                                     className="object-contain absolute h-full w-full inset-0 text-transparent bg-transparent"
                                     // Adjust path
-                                    src="./assets/images/macbook-members-area.png"
+                                    src={macbookImage}
                                 />
                             </div>
                         </div>
