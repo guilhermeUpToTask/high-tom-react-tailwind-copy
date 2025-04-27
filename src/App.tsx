@@ -1,36 +1,66 @@
-import React from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection'; // Import HeroSection
-import Footer from './components/Footer';
-import BackgroundEffects from './components/BackgroundEffects';
-import './styles/globals.css'; // Import global styles
-import FeaturesSection from './components/FeaturesSection';
-import FAQSection from './components/FAQSection';
-import EcosystemFeatures from './components/EcosystemFeatures';
-import BackgroundComponent from './components/BackgroundComponent';
-import ContactSection from './components/ContactSection';
+import React, { Suspense, lazy } from "react";
+import "./styles/globals.css"; // Import global styles
+
+// Lazy-loaded components
+const Navbar = lazy(() => import("./components/Navbar"));
+const HeroSection = lazy(() => import("./components/HeroSection"));
+const FeaturesSection = lazy(() => import("./components/FeaturesSection"));
+const EcosystemFeatures = lazy(() => import("./components/EcosystemFeatures"));
+const FAQSection = lazy(() => import("./components/FAQSection"));
+const ContactSection = lazy(() => import("./components/ContactSection"));
+const Footer = lazy(() => import("./components/Footer"));
+const BackgroundEffects = lazy(() => import("./components/BackgroundEffects"));
+const BackgroundComponent = lazy(() => import("./components/BackgroundComponent"));
+
+// A simple loader component for suspense fallbacks
+const Loader: React.FC = () => (
+  <div className="flex items-center justify-center h-screen text-white">
+    Loading...
+  </div>
+);
 
 const App: React.FC = () => {
   return (
-    // Apply the font class from globals.css to the root element
-    // Add custom cursor class if implemented: className="__className_d65c78 custom-cursor"
     <div className="__className_d65c78">
-      <BackgroundComponent/> {/* BackgroundComponent for additional effects */}
+      {/* Wrap background in suspense */}
+      <Suspense fallback={<Loader />}>
+        <BackgroundComponent />
         <BackgroundEffects />
-        {/* Use relative positioning on main container to establish stacking context */}
-        <div className="relative z-10"> {/* Ensure content is above background effects */}
-            <Navbar />
-            {/* min-h-screen ensures the main content area takes at least the full screen height */}
-            <main className="min-h-screen bg-transparent text-white"> {/* Background is handled by BackgroundEffects */}
-                {/* Page Sections */}
-                <HeroSection /> {/* Add the Hero Section */}
-                <FeaturesSection /> {/* Add the Features Section */}
-                <EcosystemFeatures/>
-                <FAQSection/>
-                <ContactSection/>
-            </main>
-            <Footer />
-        </div>
+      </Suspense>
+
+      {/* Main content stacked above background */}
+      <div className="relative z-10">
+        <Suspense fallback={<Loader />}>
+          <Navbar />
+        </Suspense>
+
+        <main className="min-h-screen bg-transparent text-white">
+          {/* Page Sections with individual suspense boundaries */}
+          <Suspense fallback={<Loader />}>
+            <HeroSection />
+          </Suspense>
+
+          <Suspense fallback={<Loader />}>
+            <FeaturesSection />
+          </Suspense>
+
+          <Suspense fallback={<Loader />}>
+            <EcosystemFeatures />
+          </Suspense>
+
+          <Suspense fallback={<Loader />}>
+            <FAQSection />
+          </Suspense>
+
+          <Suspense fallback={<Loader />}>
+            <ContactSection />
+          </Suspense>
+        </main>
+
+        <Suspense fallback={<Loader />}>
+          <Footer />
+        </Suspense>
+      </div>
     </div>
   );
 };

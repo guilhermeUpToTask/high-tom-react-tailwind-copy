@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import IphoneScene from "./IphoneScene";
+import React, { useState, useRef, lazy, Suspense } from "react";
+const IphoneScene = lazy(() => import("./IphoneScene"));
 // Import animation library if needed, e.g., import { motion, useInView } from 'framer-motion';
 // Import icon components or SVGs
 // Example: import { TargetIcon, SmartphoneIcon, LibraryIcon } from './Icons';
@@ -285,7 +285,10 @@ const FeaturesSection: React.FC = () => {
                                 <div className="w-full h-full relative">
                                     {/* The Spline component replaces the manual canvas tag */}
                                     {/* It will create and manage its own canvas element */}
-                                    <IphoneScene />
+
+                                    <Suspense fallback={<>Loading</>}>
+                                        <IphoneScene />
+                                    </Suspense>
 
                                     {/* This div seems to be an overlay element */}
                                     <div className="absolute bottom-0 left-0 right-0 h-14 bg-black z-20"></div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 // Import animation library if needed, e.g., import { motion, useInView } from 'framer-motion';
 
 interface AccordionItemProps {
@@ -7,7 +7,7 @@ interface AccordionItemProps {
   index: number; // For animation delay
 }
 
-const AccordionItem: React.FC<AccordionItemProps> = ({ title, children, index }) => {
+const AccordionItem: React.FC<AccordionItemProps> = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   // Animation setup
   // const ref = useRef(null);

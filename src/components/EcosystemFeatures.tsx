@@ -20,7 +20,7 @@ interface FeatureItemProps {
     index: number; // For staggered animation delay
 }
 
-const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text, index }) => {
+const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text }) => {
     // Animation setup (example with framer-motion)
     // const ref = useRef(null);
     // const isInView = useInView(ref, { once: true, amount: 0.5 });
